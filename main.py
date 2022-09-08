@@ -34,6 +34,7 @@ time.sleep(2)
 pagesButton = driver.find_elements(By.CSS_SELECTOR, "ul.artdeco-pagination__pages button")
 #pagesButton[2].click()
 newIds = []
+counter = 0
 for i in range(0,len(pagesButton)):
     pagesButton = driver.find_elements(By.CSS_SELECTOR, "ul.artdeco-pagination__pages button")
     pagesButton[i].click()
@@ -46,11 +47,19 @@ for i in range(0,len(pagesButton)):
     print(len(jobsId))
     for j in range(0, len(jobsId)):
         if not (jobsId[j] in checkedIds):
-            jobsContainer[j].click()
-            saveB = driver.find_element(By.CLASS_NAME, "jobs-save-button")
-            saveB.click()
-            newIds.append(jobsId[j])
-            print(f"round {j}")
+            try:
+                jobsContainer[j].click()
+                saveB = driver.find_element(By.CLASS_NAME, "jobs-save-button")
+                saveB.click()
+                newIds.append(jobsId[j])
+                print(f"round {j}")
+                counter += 1
+            except:
+                exitButton = driver.find_element(By.CSS_SELECTOR, "button.artdeco-button--circle.artdeco-button--1")
+                exitButton.click()
+                j -= 1
+
+            time.sleep(2)
 
             #easyApply = driver.find_element(By.CLASS_NAME, "jobs-apply-button")
             #easyApply.click()
@@ -67,4 +76,5 @@ print(newIds)
 with open("output.txt", 'a') as out:
     for i in range(0,len(newIds)):
         out.write(newIds[i] + '\n')
+print(f"Check the last {counter} jobIDs")
 
