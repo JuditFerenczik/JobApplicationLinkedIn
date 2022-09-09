@@ -1,8 +1,9 @@
 from selenium import webdriver
+from selenium.common import ElementNotInteractableException, ElementClickInterceptedException
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 import time
-from secrets import USERNAME,PASSWORD,PHONENUMBER
+from secrets import USERNAME,PASSWORD, PHONENUMBER
 
 checkedIds = []
 with open("output.txt", 'r') as out:
@@ -35,6 +36,7 @@ pagesButton = driver.find_elements(By.CSS_SELECTOR, "ul.artdeco-pagination__page
 #pagesButton[2].click()
 newIds = []
 counter = 0
+newJobsTitle = []
 for i in range(0,len(pagesButton)):
     pagesButton = driver.find_elements(By.CSS_SELECTOR, "ul.artdeco-pagination__pages button")
     pagesButton[i].click()
@@ -45,16 +47,28 @@ for i in range(0,len(pagesButton)):
     print(len(jobsContainer))
     print(jobsId)
     print(len(jobsId))
+    jobName = driver.find_elements(By.CSS_SELECTOR, "#main ul.scaffold-layout__list-container  a.job-card-list__title")
+    newJobs = [tmpjob.text for tmpjob in jobName]
     for j in range(0, len(jobsId)):
         if not (jobsId[j] in checkedIds):
             try:
                 jobsContainer[j].click()
+                time.sleep(1)
+                jobsContainer[j].click()
+                time.sleep(1)
+                newJob = driver.find_element(By.CSS_SELECTOR, "h2.jobs-unified-top-card__job-title")
+                newJob = newJob.text
+                print(newJob)
                 saveB = driver.find_element(By.CLASS_NAME, "jobs-save-button")
                 saveB.click()
                 newIds.append(jobsId[j])
                 print(f"round {j}")
+                #jobName = driver.find_elements(By.CSS_SELECTOR,"#main ul.scaffold-layout__list-container li.jobs-search-results__list-item a.job-card-list__title")
+                jobDesc = f"On page {i + 1}, job number {j + 1} with title '{newJob}'"
+                if not (jobDesc in newJobsTitle):
+                    newJobsTitle.append(jobDesc)
                 counter += 1
-            except:
+            except: # ElementNotInteractableException or ElementClickInterceptedException
                 exitButton = driver.find_element(By.CSS_SELECTOR, "button.artdeco-button--circle.artdeco-button--1")
                 exitButton.click()
                 j -= 1
@@ -73,8 +87,10 @@ for i in range(0,len(pagesButton)):
             #    nextButton.click()
     #jobsId.extend(tmpId)
 print(newIds)
+driver.get("https://www.linkedin.com/my-items/saved-jobs/")
 with open("output.txt", 'a') as out:
     for i in range(0,len(newIds)):
         out.write(newIds[i] + '\n')
-print(f"Check the last {counter} jobIDs")
+print(f"Check the last {counter} jobIDs and the Title of the new Job applications are")
+print(newJobsTitle)
 
